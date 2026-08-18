@@ -1,0 +1,17 @@
+# Exclude local development files from the Docker build
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+
+# IMPORTANT: Exclude the local mock bin folder so that the container 
+# executes the real system-wide 'codmod' binary instead of the mock.
+bin/
+
+# Exclude local mock storage and temp workspace folders
+mock-storage/
+tmp/
+.system_generated/
+*.log

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  codmod-gui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codmod-gui-app
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - HOST=0.0.0.0
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME:-codmod-output}
+      - GCP_PROJECT=${GCP_PROJECT:-coba-sdlc}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-coba-sdlc}
+      # Set default directory where local repositories are mounted inside the container
+      - LOCAL_REPOS_DIR=/repos
+      # Ensure CLI tools write user configuration to writable /tmp/.config inside container
+      - XDG_CONFIG_HOME=/tmp/.config
+      # Google Cloud Application Default Credentials for GCS upload/history access
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-credentials.json
+    volumes:
+      # =====================================================================
+      # LOCAL REPOSITORIES VOLUME MOUNT
+      # Mount any local folder from your Mac/host machine containing repositories
+      # into /repos inside the container so you can select them via the Web GUI
+      # folder picker dialog.
+      # Example: Change ./sample-repos to ~/work/projects:/repos:ro
+      # =====================================================================
+      - ./sample-repos:/repos:ro
+      - ~/.config/gcloud:/home/node/.config/gcloud:ro
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+      - ~/.config/gcloud/application_default_credentials.json:/app/gcp-credentials.json:ro
+    restart: unless-stopped

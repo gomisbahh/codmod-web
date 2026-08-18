@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google CodMod | Application Modernization Assessment</title>
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Vanilla CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background decorative glowing orbs -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 22h20L12 2z" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M12 7l-7 12h14L12 7z" fill="url(#logo-grad-fill)"/>
+          <defs>
+            <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#4285F4"/>
+              <stop offset="50%" stop-color="#34A853"/>
+              <stop offset="100%" stop-color="#FBBC05"/>
+            </linearGradient>
+            <linearGradient id="logo-grad-fill" x1="5" y1="7" x2="19" y2="19" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#4285F4" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#EA4335" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-text">
+          <h1>Google Codmod</h1>
+          <span>Application Modernization Assessment</span>
+        </div>
+      </div>
+      <div class="header-status" style="display: flex; align-items: center; gap: 1rem;">
+        <span class="status-pill active-pill" id="system-status-indicator">System Connected</span>
+        <button id="logout-btn" class="btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; border-color: var(--google-red); color: var(--google-red); background: rgba(234, 67, 53, 0.05); border-radius: 8px;">
+          <span>Logout</span>
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-grid">
+      
+      <!-- Section 1: Configuration Form -->
+      <section class="card config-card">
+        <div class="card-header">
+          <span class="card-step">01</span>
+          <h2>Assessment Configuration</h2>
+        </div>
+        <form id="assessment-form" class="config-form">
+          
+          <!-- Repository Source Type Selector -->
+          <div class="form-group">
+            <label>Repository Source Type <span class="required">*</span></label>
+            <div class="source-type-toggle">
+              <label class="radio-card active" id="type-git-label">
+                <input type="radio" name="source-type" value="git" checked>
+                <span class="radio-icon">🌐</span>
+                <div class="radio-text">
+                  <strong>Git Repository</strong>
+                  <span>Clone HTTPS repository (GitHub, GitLab, etc.)</span>
+                </div>
+              </label>
+              <label class="radio-card" id="type-local-label">
+                <input type="radio" name="source-type" value="local">
+                <span class="radio-icon">📁</span>
+                <div class="radio-text">
+                  <strong>Local Machine Folder</strong>
+                  <span>Process repository from local disk / mounted volume</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Git Repository Section -->
+          <div id="git-source-section">
+            <div class="form-group">
+              <label for="git-url">Git Repository URL <span class="required">*</span></label>
+              <input type="url" id="git-url" name="git-url" placeholder="https://github.com/username/repository" required>
+              <span class="form-help">Standard HTTPS GitHub, GitLab, or Bitbucket repositories.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="git-branch">Git Branch / Reference</label>
+              <input type="text" id="git-branch" name="git-branch" placeholder="main (default)">
+            </div>
+
+            <!-- Optional Private Repo Auth -->
+            <details class="advanced-details git-auth-details">
+              <summary class="advanced-summary">🔐 Private Repository Authentication (Optional)</summary>
+              <div class="advanced-content">
+                <div class="form-group">
+                  <label for="git-username">Username / Account</label>
+                  <input type="text" id="git-username" name="git-username" placeholder="e.g. oauth2 or git">
+                </div>
+                <div class="form-group">
+                  <label for="git-password">Password / Personal Access Token (PAT)</label>
+                  <input type="password" id="git-password" name="git-password" placeholder="ghp_xxxx or secret token" autocomplete="off">
+                  <span class="form-help">Used in-memory only during cloning. Never stored in GCS or broadcast in logs.</span>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Local Folder Section (Hidden by default) -->
+          <div id="local-source-section" hidden>
+            <div class="form-group">
+              <label for="local-path">Local Repository Folder Path <span class="required">*</span></label>
+              <div class="local-path-input-group">
+                <input type="text" id="local-path" name="local-path" placeholder="/repos/my-app">
+                <button type="button" class="btn-secondary btn-browse-folder" id="browse-folder-btn">📁 Browse Folder...</button>
+              </div>
+              <span class="form-help">Path to a local repository folder on disk or mounted volume in Docker Compose (e.g. <code>/repos/sample-app</code>).</span>
+            </div>
+          </div>
+
+          <!-- Google Cloud Config (Collapsible/Advanced) -->
+          <details class="advanced-details" open>
+            <summary class="advanced-summary">GCP Target Settings</summary>
+            <div class="advanced-content">
+              <!-- GCP Project ID -->
+              <div class="form-group">
+                <label for="gcp-project">Vertex AI GCP Project ID</label>
+                <input type="text" id="gcp-project" name="gcp-project" placeholder="my-gcp-project-id">
+                <span class="form-help">Project with Vertex AI API enabled.</span>
+              </div>
+
+              <!-- GCP Region -->
+              <div class="form-group">
+                <label for="gcp-region">Vertex AI Region</label>
+                <input type="text" id="gcp-region" name="gcp-region" placeholder="us-central1" value="us-central1">
+              </div>
+<!-- Target GCS Bucket -->
+<div class="form-group">
+  <label for="gcs-bucket">GCS Target Bucket <span class="required">*</span></label>
+  <input type="text" id="gcs-bucket" name="gcs-bucket" placeholder="my-codmod-reports-bucket" required>
+  <span class="form-help">Bucket where the generated HTML report will be saved.</span>
+</div>
+            </div>
+          </details>
+
+          <!-- Codmod Options -->
+          <details class="advanced-details" open>
+            <summary class="advanced-summary">Codmod Engine Options</summary>
+            <div class="advanced-content grid-2">
+              <!-- Report Type -->
+              <div class="form-group">
+                <label for="report-type">Report Type</label>
+                <select id="report-type" name="report-type">
+                  <option value="default" selected>Default Assessment</option>
+                  <option value="full">Full Assessment</option>
+                  <option value="data-layer">Data Layer Assessment</option>
+                  <option value="custom">Custom Assessment</option>
+                </select>
+              </div>
+
+              <!-- Model Set -->
+              <div class="form-group">
+                <label for="model-set">Gemini Model Set</label>
+                <select id="model-set" name="model-set">
+                  <option value="2.5-pro" selected>Gemini 2.5 Pro (Recommended)</option>
+                  <option value="2.5-flash">Gemini 2.5 Flash</option>
+                  <option value="2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="adaptive">Adaptive Cost-Saving</option>
+                </select>
+              </div>
+
+              <!-- Format -->
+              <div class="form-group">
+                <label for="report-format">Output Format</label>
+                <select id="report-format" name="report-format">
+                  <option value="html" selected>HTML (.html)</option>
+                  <option value="markdown">Markdown (.md)</option>
+                  <option value="json">JSON (.json)</option>
+                </select>
+              </div>
+
+              <!-- Intent -->
+              <div class="form-group">
+                <label for="modernization-intent">Modernization Intent</label>
+                <select id="modernization-intent" name="modernization-intent">
+                  <option value="" selected>None (General Assessment)</option>
+                  <option value="JAVA_LEGACY_TO_MODERN">Legacy Java to Java 21</option>
+                  <option value="MICROSOFT_MODERNIZATION">.NET Framework to Modern .NET</option>
+                  <option value="ARM_MIGRATION">x86 to Arm (Google Axion)</option>
+                  <option value="CLOUD_TO_CLOUD">AWS/Azure to GCP Migration</option>
+                  <option value="WILDFLY_LEGACY_TO_MODERN">WildFly App Server Modernization</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Optional Sections -->
+            <div class="form-group">
+              <label>Optional Sections (Check to Include)</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="optional-sections" value="files">
+                  <span>Files Hierarchy View</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="optional-sections" value="classes">
+                  <span>Code Classes & Dependencies View (Java / C#)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Custom Context -->
+            <div class="form-group" id="custom-context-group">
+              <label for="custom-context">Additional Context / Guidelines</label>
+              <textarea id="custom-context" name="custom-context" rows="3" placeholder="Provide any architectural guidelines or specific compliance goals. Useful for custom report type."></textarea>
+            </div>
+          </details>
+
+          <!-- Form Actions -->
+          <div class="form-actions-bar">
+            <button type="button" id="estimate-cost-btn" class="btn-secondary btn-estimate">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                <rect x="4" y="2" width="16" height="20" rx="2"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="8" y1="10" x2="8.01" y2="10"/>
+                <line x1="12" y1="10" x2="12.01" y2="10"/>
+                <line x1="16" y1="10" x2="16.01" y2="10"/>
+                <line x1="8" y1="14" x2="8.01" y2="14"/>
+                <line x1="12" y1="14" x2="12.01" y2="14"/>
+                <line x1="16" y1="14" x2="16.01" y2="14"/>
+                <line x1="8" y1="18" x2="8.01" y2="18"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+                <line x1="16" y1="18" x2="16.01" y2="18"/>
+              </svg>
+              <span>Estimate Cost</span>
+            </button>
+            <button type="submit" id="submit-btn" class="btn-primary">
+              <span>Run Modernization Assessment</span>
+              <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Terminal and Dashboard -->
+      <div class="right-column">
+        
+        <!-- Section 2: Live Log Terminal -->
+        <section class="card terminal-card" id="terminal-section">
+          <div class="card-header">
+            <span class="card-step">02</span>
+            <h2>Assessment Live Logs</h2>
+            <div class="terminal-controls">
+              <span class="terminal-badge" id="terminal-job-id">No Active Job</span>
+              <button class="btn-icon-only" id="clear-terminal-btn" title="Clear Console">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="terminal-body" id="log-output">
+            <div class="terminal-welcome-msg">
+              <span class="term-system">[system]</span> Ready. Configure and start an assessment to stream real-time logs here.
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Job History List -->
+        <section class="card history-card">
+          <div class="card-header">
+            <span class="card-step">03</span>
+            <h2>Assessment Job History</h2>
+            <button class="btn-refresh" id="refresh-history-btn">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l6.07-5.67" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="history-table" id="jobs-table">
+              <thead>
+                <tr>
+                  <th>Repo URL</th>
+                  <th>GCS Bucket</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Created At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="jobs-table-body">
+                <tr>
+                  <td colspan="6" class="table-empty">No jobs ran yet. Run an assessment to see history.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Modal Report Viewer -->
+    <section class="report-modal" id="report-modal" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-report-title">Assessment Report</h2>
+          <div class="modal-actions">
+            <a href="#" id="modal-download-btn" class="btn-secondary" download>
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Download Report</span>
+            </a>
+            <button class="btn-close" id="modal-close-btn">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <!-- Sandboxed Iframe for security -->
+          <iframe id="report-frame" sandbox="allow-scripts allow-downloads" src="about:blank"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal Folder Browser (Windows/Mac Explorer style) -->
+    <section class="report-modal" id="folder-browse-modal" hidden>
+      <div class="modal-content folder-modal-content">
+        <div class="modal-header">
+          <h2>📁 Select Local Repository Folder</h2>
+          <button class="btn-close" id="folder-modal-close-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body folder-modal-body">
+          <div class="folder-breadcrumb-bar">
+            <button type="button" class="btn-secondary btn-sm" id="folder-up-btn" disabled>⬆️ Parent Folder</button>
+            <span id="folder-current-path" class="folder-path-display">/repos</span>
+          </div>
+          <div class="folder-list-container" id="folder-list-container">
+            <!-- Folders populated via JS -->
+          </div>
+          <div class="folder-modal-footer">
+            <span class="folder-selected-label">Selected: <strong id="folder-selected-path">None</strong></span>
+            <div class="folder-footer-actions">
+              <button type="button" class="btn-secondary" id="folder-cancel-btn">Cancel</button>
+              <button type="button" class="btn-primary" id="folder-select-confirm-btn" disabled>Select This Folder</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal Cost Estimate -->
+    <section class="report-modal" id="cost-estimate-modal" hidden>
+      <div class="modal-content cost-modal-content">
+        <div class="modal-header">
+          <h2>💰 Assessment Cost Estimate</h2>
+          <button class="btn-close" id="cost-modal-close-btn">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body cost-modal-body">
+          <div class="cost-estimate-display-box">
+            <span class="cost-label">Estimated Total Cost</span>
+            <div class="cost-amount" id="cost-amount-value">$0.00 USD</div>
+            <p class="cost-disclaimer" id="cost-disclaimer-text">
+              Estimate based on Vertex AI pricing and does not include negotiated prices or discounts.
+            </p>
+          </div>
+          <div class="cost-modal-footer">
+            <button type="button" class="btn-secondary" id="cost-cancel-btn">Close</button>
+            <button type="button" class="btn-primary" id="cost-proceed-btn">
+              <span>Run Full Assessment Now</span>
+              <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
